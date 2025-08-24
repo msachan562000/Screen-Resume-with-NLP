@@ -1,0 +1,65 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  appointments Appointment[]
+  invoices  Invoice[]
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  createdAt DateTime @default(now())
+  appointments Appointment[]
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  name      String
+  duration  Int
+  price     Int      // cents
+  createdAt DateTime @default(now())
+  appointments Appointment[]
+  invoices  Invoice[]
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  date      DateTime
+  duration  Int
+  status    String   @default("confirmed")
+  notes     String?
+  client    Client   @relation(fields: [clientId], references: [id])
+  clientId  String
+  staff     Staff    @relation(fields: [staffId], references: [id])
+  staffId   String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  serviceId String
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id         String   @id @default(cuid())
+  amount     Int
+  status     String   @default("unpaid")
+  client     Client   @relation(fields: [clientId], references: [id])
+  clientId   String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  serviceId  String
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  appointmentId String?
+  createdAt  DateTime @default(now())
+}
